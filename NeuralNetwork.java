@@ -8,13 +8,17 @@ public class NeuralNetwork {
 
     public static double alpha;
 
-    public final int MAX_EPOCH = 1000;
+    public final int MAX_EPOCH = 100;
 
     public  ArrayList<Perceptron> networks;
 
     public ArrayList<ArrayList<Double>> inputs;
 
+    public ArrayList<ArrayList<Double>> testInputs;
+
     public ArrayList<Image> trainingImages;
+
+    public ArrayList<Image> testImages;
 
     public ArrayList<Integer> results;
 
@@ -23,16 +27,18 @@ public class NeuralNetwork {
         alpha = 1;
         networks = new ArrayList<Perceptron>();
         inputs = new ArrayList<ArrayList<Double>>();
+        testInputs = new ArrayList<ArrayList<Double>>();
         trainingImages = new ArrayList<Image>(Setup.trainingData);
+        testImages = new ArrayList<Image>(Setup.testData);
         results = new ArrayList<Integer>();
 
         for (int i = 0; i < 10; i ++){
             Perceptron newPerc = new Perceptron(i);
             networks.add(newPerc);
         }
-
         getInput();
         learn();
+        test();
     }
 
     public void getInput(){
@@ -43,11 +49,17 @@ public class NeuralNetwork {
 
         }
 
+        for(int i = 0; i < Setup.testData.size(); i++){
+
+            testInputs.add(Setup.testData.get(i).inputFormat);
+
+        }
+
     }
 
-    public void decayAlpha(int t){
+    public void decayAlpha(double t){
 
-        alpha = (double) (1000/(1000 + t));
+        alpha =  (500/(500 + t));
 
     }
 
@@ -59,8 +71,6 @@ public class NeuralNetwork {
                 for(int j = 0; j < networks.size(); j ++){
 
                     //stores all the outputs of the 10 perceptrons
-
-
                     networks.get(j).passInput(inputs.get(i));
                     networks.get(j).calculateOutput();
 
@@ -68,28 +78,62 @@ public class NeuralNetwork {
 
                 }
 
+                int predictedOutput = selectMaxOutput(outputs);
+
                 //if it predicts incorrectly then modify weights
-                if(selectMaxOutput(outputs) != trainingImages.get(i).tureLabel){
+                if(predictedOutput != trainingImages.get(i).tureLabel){
 
                     //increase weights of perceptron that predicted incorrectly
-                    networks.get(selectMaxOutput(outputs)).updateWeights(true);
+                    networks.get(predictedOutput).updateWeights(false);
+                    //System.out.println("Selected output: "+selectMaxOutput(outputs) + " true output: " + trainingImages.get(i).tureLabel + " EPOCH: " + epoch);
+
 
                     //reduce the weights of what it should have predicted
-                    networks.get(trainingImages.get(i).tureLabel).updateWeights(false);
+                    networks.get(trainingImages.get(i).tureLabel).updateWeights(true);
                 }
                 else{
+                    //System.out.println("Selected output: "+selectMaxOutput(outputs) + " true output: " + trainingImages.get(i).tureLabel + " EPOCH: " + epoch);
 
-                    results.add(selectMaxOutput(outputs));
-                    System.out.println(selectMaxOutput(outputs));
+
+                    results.add(predictedOutput);
 
                 }
 
             }
 
-            decayAlpha(epoch);
+            //decayAlpha(epoch);
 
-            //testPrint();
+
         }
+
+
+        //testPrint();
+    }
+
+    public void test(){
+
+        for(int i = 0; i < testInputs.size(); i++){
+
+            ArrayList<Double> outputs = new ArrayList<Double>();
+
+            for(int j = 0; j < networks.size(); j ++){
+
+                //stores all the outputs of the 10 perceptrons
+                networks.get(j).passInput(testInputs.get(i));
+                networks.get(j).calculateOutput();
+
+                outputs.add(networks.get(j).output);
+
+            }
+
+            int predictedOutput = selectMaxOutput(outputs);
+
+            System.out.println("Predicted: " + predictedOutput + " Expected: " + Setup.testlabels.get(i));
+
+
+        }
+
+        testPrint();
 
 
 
@@ -109,10 +153,12 @@ public class NeuralNetwork {
 
         for(int i = 0; i < outs.size(); i++){
 
+            //System.out.print(" " + outs.get(i) + " ");
             if(max == outs.get(i)){
                 perc = i;
             }
         }
+       // System.out.println();
 
         return perc;
 
@@ -126,6 +172,8 @@ public class NeuralNetwork {
 
         }
 
+
+       //System.out.println("Accuracy: " + results.size());
 
 
         /*for(int i = 0; i < trainingImages.size(); i++){

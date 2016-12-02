@@ -97,7 +97,7 @@ public class Perceptron {
 
     private Double[] alphaDotInput(){
 
-        ArrayList<Double> newInput = new ArrayList<Double>(input);
+        ArrayList<Double> newInput = new ArrayList<Double>();
 
         for (int i = 0; i < input.size(); i++){
             newInput.add(input.get(i)*NeuralNetwork.alpha);
