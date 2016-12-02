@@ -5,7 +5,7 @@ import java.util.ArrayList;
  */
 public class Image implements Comparable<Image> {
 
-    public double tureLabel;
+    public int tureLabel;
     public char[][] image;
     public ArrayList<Double> inputFormat;
 

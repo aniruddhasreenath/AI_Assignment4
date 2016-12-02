@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.DoubleSummaryStatistics;
 
 /**
  * Created by sreenath on 30/11/2016.
@@ -13,11 +14,17 @@ public class NeuralNetwork {
 
     public ArrayList<ArrayList<Double>> inputs;
 
+    public ArrayList<Image> trainingImages;
+
+    public ArrayList<Integer> results;
+
     public NeuralNetwork(){
 
         alpha = 1;
         networks = new ArrayList<Perceptron>();
         inputs = new ArrayList<ArrayList<Double>>();
+        trainingImages = new ArrayList<Image>(Setup.trainingData);
+        results = new ArrayList<Integer>();
 
         for (int i = 0; i < 10; i ++){
             Perceptron newPerc = new Perceptron(i);
@@ -46,24 +53,68 @@ public class NeuralNetwork {
 
     public void learn(){
 
+        for (int epoch = 0; epoch < MAX_EPOCH; epoch++){
+            for(int i = 0; i < inputs.size(); i++){
+                ArrayList<Double> outputs = new ArrayList<Double>();
+                for(int j = 0; j < networks.size(); j ++){
 
-        for(int i = 0; i < inputs.size(); i++){
+                    //stores all the outputs of the 10 perceptrons
 
-            for(int j = 0; j < networks.size(); j ++){
 
-                networks.get(j).passInput(inputs.get(i));
-                networks.get(j).calculateOutput();
+                    networks.get(j).passInput(inputs.get(i));
+                    networks.get(j).calculateOutput();
 
-                //TODO add the update rule logic here
+                    outputs.add(networks.get(j).output);
 
-                if(networks.get(j).output)
+                }
 
+                //if it predicts incorrectly then modify weights
+                if(selectMaxOutput(outputs) != trainingImages.get(i).tureLabel){
+
+                    //increase weights of perceptron that predicted incorrectly
+                    networks.get(selectMaxOutput(outputs)).updateWeights(true);
+
+                    //reduce the weights of what it should have predicted
+                    networks.get(trainingImages.get(i).tureLabel).updateWeights(false);
+                }
+                else{
+
+                    results.add(selectMaxOutput(outputs));
+                    System.out.println(selectMaxOutput(outputs));
+
+                }
 
             }
 
+            decayAlpha(epoch);
+
+            //testPrint();
         }
 
-        testPrint();
+
+
+    }
+
+    public int selectMaxOutput(ArrayList<Double> outs){
+
+        double max = 0;
+        int perc = 0;
+
+        for(int i = 0; i < outs.size(); i++){
+
+            if(max < outs.get(i)){
+                max = outs.get(i);
+            }
+        }
+
+        for(int i = 0; i < outs.size(); i++){
+
+            if(max == outs.get(i)){
+                perc = i;
+            }
+        }
+
+        return perc;
 
     }
 
@@ -75,6 +126,13 @@ public class NeuralNetwork {
 
         }
 
+
+
+        /*for(int i = 0; i < trainingImages.size(); i++){
+
+            System.out.println(trainingImages.get(i).tureLabel);
+
+        }*/
 
     }
 
