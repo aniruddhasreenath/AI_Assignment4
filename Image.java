@@ -52,6 +52,8 @@ public class Image implements Comparable<Image> {
             }
         }
 
+        input.add(1.0);
+
         return input;
     }
 
