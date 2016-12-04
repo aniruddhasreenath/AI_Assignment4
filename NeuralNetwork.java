@@ -1,7 +1,4 @@
 import java.util.ArrayList;
-import java.math.*;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Created by sreenath on 30/11/2016.
@@ -10,7 +7,7 @@ public class NeuralNetwork {
 
     public static double alpha;
 
-    public final int MAX_EPOCH = 3;
+    public final int MAX_EPOCH = 1000;
 
     public  ArrayList<Perceptron> networks;
 
@@ -42,11 +39,8 @@ public class NeuralNetwork {
             networks.add(newPerc);
         }
 
-        //System.out.println(trainingImages.get(0));
         getInput();
         learn();
-        //System.out.println("Before input is given");
-        //testPrint();
         test();
     }
 
@@ -68,17 +62,17 @@ public class NeuralNetwork {
 
     public void decayAlpha(double t){
 
-        alpha =  (1000/(10 + t));
+        alpha =  (1000/(1000 + t));
 
     }
 
     public void learn(){
+        System.out.println("Training...");
+        System.out.println();
         int count = 0;
-
         for (int epoch = 0; epoch < MAX_EPOCH; epoch++){
 
-            //System.out.println("Training on EPOCH: " + epoch + " Learning rate: " + alpha);
-
+            System.out.println("EPOCH: " + epoch + " Learning rate: " + alpha);
             for(int i = 0; i < inputs.size(); i++){
                 ArrayList<Double> outputs = new ArrayList<Double>();
                 for(int j = 0; j < networks.size(); j ++){
@@ -112,17 +106,22 @@ public class NeuralNetwork {
             }
 
             decayAlpha(epoch);
-            System.out.println((5000 - count));
-            //randomiseData();
+
+            //if the error is 0 stop learning
+            if((5000 - count) == 0){
+                System.out.println();
+                System.out.println("Converged at EPOCH: " + epoch);
+                break;
+            }
             count = 0;
         }
     }
 
-    public void randomiseData(){
-        Collections.shuffle(inputs);
-    }
 
     public void test(){
+
+        System.out.println();
+        System.out.println("Testing...");
 
         for(int i = 0; i < testInputs.size(); i++){
 
@@ -140,8 +139,6 @@ public class NeuralNetwork {
 
             int predictedOutput = selectMaxOutput(outputs);
 
-            //System.out.println("Predicted: " + predictedOutput + " Expected: " + Setup.testlabels.get(i));
-
             if(predictedOutput == Setup.testlabels.get(i)){
 
                 numberofCorrectMatches = numberofCorrectMatches + 1;
@@ -151,9 +148,8 @@ public class NeuralNetwork {
 
         }
 
+        System.out.println();
         testPrint();
-
-
     }
 
     public int selectMaxOutput(ArrayList<Double> outs){
@@ -179,8 +175,7 @@ public class NeuralNetwork {
 
         }*/
 
-        System.out.println("number of correct matches "+ ((double) numberofCorrectMatches/ (double)testImages.size())*100 + "%");
-
+        System.out.println("Accuracy: "+ ((double) numberofCorrectMatches/ (double)testImages.size())*100 + "%");
 
 
     }
